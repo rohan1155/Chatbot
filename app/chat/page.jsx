@@ -1,33 +1,50 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import Markdown from "react-markdown";
 
 export default function Chat() {
   const [prompt, setPrompt] = useState("");
   const [conversation, setConversation] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Create a ref for the conversation container
+  const conversationEndRef = useRef(null);
+
+  // Scroll to the bottom whenever the conversation updates
+  const scrollToBottom = () => {
+    conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversation]);
+
   const handleSubmit = async () => {
     const trimmedInput = prompt.trim();
     if (!trimmedInput) return;
 
     // Add the user input to the conversation first
-    setConversation((prev) => [
-      ...prev,
+    const updatedConversation = [
+      ...conversation,
       { sender: "user", message: trimmedInput },
-    ]);
+    ];
+
+    setConversation(updatedConversation);
     setLoading(true);
     setPrompt("");
+
     try {
+      // Send the entire conversation to the API
       const response = await axios.post("/api", {
-        prompt: trimmedInput,
+        conversation: updatedConversation, // Send the conversation history
       });
 
-      // Add the response from the API to the conversation
+      // Add the bot's response to the conversation
       setConversation((prev) => [
         ...prev,
-        { sender: "bot", message: response.data },
+        { sender: "bot", message: response.data }, // Assume response.data contains the bot's message
       ]);
     } catch (error) {
       console.log(error);
@@ -67,6 +84,7 @@ export default function Chat() {
           />
         </button>
       </div>
+
       {/* Content section */}
       <div className="flex-grow flex flex-col text-white mt-2 overflow-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 px-4">
         {/* Display conversation history */}
@@ -75,14 +93,20 @@ export default function Chat() {
             key={index}
             className={`my-2 p-3 rounded-lg ${
               message.sender === "user"
-                ? "bg-blue-500 text-white self-end max-w-[80%]"
+                ? "bg-blue-900 text-white self-end max-w-[80%]"
                 : "bg-gray-700 text-white self-start max-w-[80%]"
             }`}
           >
-            {message.message}
+            <div className="prose prose-white max-w-none">
+              <Markdown>{message.message}</Markdown>
+            </div>
           </div>
         ))}
+
+        {/* This element is used to scroll to the bottom */}
+        <div ref={conversationEndRef} />
       </div>
+
       {/* Input section */}
       <div className="sticky bottom-3 flex justify-center items-center px-4 my-4">
         <div className="flex items-center w-[90%] bg-[#2f2f2f] rounded-2xl px-4 py-2">
