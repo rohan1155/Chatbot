@@ -86,7 +86,7 @@ export default function Chat() {
       </div>
 
       {/* Content section */}
-      <div className="flex-grow flex flex-col text-white mt-2 overflow-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 px-4">
+      <div className="flex-grow flex flex-col text-white overflow-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 px-4">
         {/* Display conversation history */}
         {conversation.map((message, index) => (
           <div
@@ -108,7 +108,7 @@ export default function Chat() {
       </div>
 
       {/* Input section */}
-      <div className="sticky bottom-3 flex justify-center items-center px-4 my-4">
+      <div className="sticky bottom-3 flex justify-center items-center px-4 my-2">
         <div className="flex items-center w-[90%] bg-[#2f2f2f] rounded-2xl px-4 py-2">
           {loading ? (
             <div className="flex-grow">Loading...</div>
